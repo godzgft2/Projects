@@ -1,0 +1,28 @@
+<!-- activity_main.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/backgrounds" />
+
+    <GridView
+        android:id="@+id/grid_view_cards"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="100dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="8dp"
+        android:horizontalSpacing="8dp"
+        android:padding="8dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"/>
+
+
+</RelativeLayout>
+
