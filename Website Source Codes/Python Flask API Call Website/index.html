@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>
+            
+            var companyData = null;
+            var stockData = null;
+
+            function displayTab(tabName) {
+                var companyTab = document.getElementById('company-tab');
+                var stockTab = document.getElementById('stock-tab');
+                var companyDiv = document.getElementById('company-info');
+                var stockDiv = document.getElementById('stock-info');
+
+                if (tabName === 'company') {
+                    companyTab.classList.add('active');
+                    stockTab.classList.remove('active');
+                    companyDiv.style.display = 'block';
+                    stockDiv.style.display = 'none';
+                    if (companyData) {
+                        displayCompanyData(companyData);
+                    }
+                } else {
+                    companyTab.classList.remove('active');
+                    stockTab.classList.add('active');
+                    companyDiv.style.display = 'none';
+                    stockDiv.style.display = 'block';
+                    if (stockData) {
+                        displayStockData(stockData);
+                    }
+                }
+            }
+
+            function searchButton() {
+
+                var r1 = new XMLHttpRequest();
+                var stockName = document.getElementById('stock-name').value;
+                var url1 = '/?search=' + stockName;
+
+                r1.open('POST', url1, true);
+                
+                r1.onreadystatechange = function() {
+
+                    if (r1.readyState === 4) {
+                        console.log("Response received from:", url1);
+                        console.log("Response status:", r1.status);
+                        console.log("Response text:", r1.responseText);
+                        if (r1.status === 200 && r1.responseText) {
+                            var data = JSON.parse(r1.responseText);
+                            companyData = data;
+                            displayTab('company');
+                        } else {
+                            console.error("Empty or error response received.");
+                        }
+                    }
+                };
+                r1.send();
+
+
+                var r2 = new XMLHttpRequest();
+
+                var url2 = '/?iex=' + stockName;
+
+                r2.open('POST', url2, true);
+                
+                r2.onreadystatechange = function() {
+
+                    if (r2.readyState === 4) {
+                        console.log("Response received from:", url2);
+                        console.log("Response status:", r2.status);
+                        console.log("Response text:", r2.responseText);
+                        if (r2.status === 200 && r2.responseText) {
+                            var data = JSON.parse(r2.responseText);
+                            stockData = data;
+                            displayTab('stock');
+                        } else {
+                            console.error("Empty or error response received.");
+                        }
+                    }
+                };
+                r2.send();
+            }
+
+            function displayCompanyData(data) {
+                var companyInfoDiv = document.getElementById('company-info');
+                companyInfoDiv.innerHTML = '';
+
+                var heading = document.createElement('h2');
+                heading.textContent = 'Company Outlook';
+                companyInfoDiv.appendChild(heading);
+
+                var table = document.createElement('table');
+                table.style.width = '100%';
+
+                var headers = ['Company Name', 'Stock Ticker Symbol', 'Stock Exchange Code', 'Company Start Date', 'Description'];
+
+                var values = ['name', 'ticker', 'exchangeCode', 'startDate', 'description'];
+
+                for (var i = 0; i < headers.length; i++) {
+                    var row = document.createElement('tr');
+                    var rowHeader = document.createElement('td');
+                    var rowValue = document.createElement('td');
+
+                    rowHeader.innerHTML = '<strong>' + headers[i] + '</strong> ';
+                    rowValue.innerHTML = data[values[i]];
+
+                    rowHeader.style.width = '25%';
+                    rowValue.style.textAlign = 'center';
+                    rowValue.style.maxHeight = '5em';
+                    rowValue.style.overflow = 'hidden';
+                    rowValue.style.textOverflow = 'ellipsis';
+
+                    row.appendChild(rowHeader);
+                    row.appendChild(rowValue);
+                    table.append(row);
+                };
+                
+                companyInfoDiv.appendChild(table);
+            }
+
+            function displayStockData(data) {
+                var stockDiv = document.getElementById('stock-info');
+                stockDiv.innerHTML = '';
+
+                var heading = document.createElement('h2');
+                heading.textContent = 'Stock Summary';
+                stockDiv.appendChild(heading);
+
+                var table = document.createElement('table');
+                table.style.width = '100%';
+
+                var headers = ['Stock Ticker Symbol', 'Trading Day', 'Previous Closing Price', 'Opening Price',
+                 'High Price', 'Low Price', 'Last Price', 'Change', 'Change Percent', 'Number of Shares Traded'];
+
+                var values = ['ticker', 'timestamp', 'prevClose', 'open', 'high', 'low', 'last',
+                 'change', 'percent', 'volume'];
+
+                
+                
+                for (var i = 0; i < headers.length; i++) {
+                    var row = document.createElement('tr');
+                    var rowHeader = document.createElement('td');
+                    var rowValue = document.createElement('td');
+
+                    rowHeader.innerHTML = '<strong>' + headers[i] + '</strong> ';
+                    rowValue.innerHTML = data[values[i]];
+
+                    rowHeader.style.width = '25%';
+                    rowValue.style.textAlign = 'center';
+                    rowValue.style.maxHeight = '5em';
+                    rowValue.style.overflow = 'hidden';
+                    rowValue.style.textOverflow = 'ellipsis';
+
+                    row.appendChild(rowHeader);
+                    row.appendChild(rowValue);
+                    table.append(row);
+                };
+                
+                stockDiv.appendChild(table);
+            }
+
+        </script>
+        <style>
+            .tab {
+                display: inline-block;
+                padding: 10px 20px;
+                cursor: pointer;
+                background-color: #f0f0f0;
+            }
+
+            .active {
+                background-color: #ccc;
+            }
+
+            #company-info, #stock-info {
+                display: none;
+            }
+        </style>
+        <title>Stock Search</title>
+    </head>
+    <body>
+        <h1>Stock Search</h1>
+        <label for="stock-name">Enter Stock Ticker Symbol *</label>
+        <input type="text" id="stock-name" name="ticker" required><br>
+        <button id="search-button" onclick="searchButton()">Search</button>
+        <button onclick="document.getElementById('stock-name').value = ''">Clear</button>
+        
+        <div>
+            <div class="tab active" id="company-tab" onclick="displayTab('company')">Company Info</div>
+            <div class="tab" id="stock-tab" onclick="displayTab('stock')">Stock Info</div>
+        </div>
+
+        <div id="company-info">
+
+        </div>
+
+        <div id="stock-info">
+
+        </div>
+
+    </body>
+</html>
